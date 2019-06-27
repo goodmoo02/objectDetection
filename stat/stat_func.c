@@ -60,8 +60,10 @@ MOUNTP *dfget(MOUNTP *MP)
                 // 파일시스템의 총 할당된 크기와 사용량을 구한다.        
                 statfs(MP->mountdir, &lstatfs);
                 MP->size.blocks = lstatfs.f_blocks * (lstatfs.f_bsize/1024); 
+	// 파일 시스템 내 총 데이터 블럭 * 최적화된 전송 블럭 크기 / 1024
                 MP->size.avail  = lstatfs.f_bavail * (lstatfs.f_bsize/1024); 
                 return MP;
+	// 비-슈퍼 유저를 위한 여유 블럭 * 최적화된 전송 블럭 크기 / 1024
             }
         }
     }
@@ -88,7 +90,7 @@ int main()
     {
         while(dfget(MP))
         {
-	    printf("%8s%10s%8s%13s%12s%7s%12s", MP->mountdir, MP->devname, MP->size.blocks, MP->size.avail);
+	    printf("%8s%10s%13lu%12lu", MP->mountdir, MP->devname, MP->size.blocks, MP->size.avail);
         }
         printf("=========================\n\n");
         sleep(1);

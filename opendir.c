@@ -17,6 +17,7 @@ int main(void)
     if(NULL!=dir_info)
     {
         while(dir_entry=readdir(dir_info))
+ // readdir()는 DIR *dir이 가리키는 디렉토리 내 파일 목록의 주소dirent를 반환하고, *dir의 다음 파일 목록을 가르킨다. 파일 목록은 readdir함수를 반복 호출해서 반환받은 구조체의 내용을 얻어내면 된다.
         {
             printf("%s\n", dir_entry->d_name); 
         }

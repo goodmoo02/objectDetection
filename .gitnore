@@ -1,0 +1,8 @@
+## NESOY Ignore File ##
+
+*.log
+*.bak
+
+report_card.pdf
+*.c
+

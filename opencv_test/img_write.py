@@ -1,5 +1,5 @@
 import cv2
-img = '/home/jiwoong/objectDetection/opencv_test/index.jpeg'
+img = './index.jpeg'
 
 img1 = cv2.imread(img)
 

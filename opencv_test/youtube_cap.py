@@ -1,5 +1,6 @@
-import cv2, pafy
-url = "https://www.youtube.com/watch?v=eRN4WmoaCDY"
+import cv2
+import pafy
+url = "https://www.youtube.com/watch?v=u_Q7Dkl7AIk"
 video = pafy.new(url)
 
 # print('title = ', video.title)

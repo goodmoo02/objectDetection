@@ -19,6 +19,10 @@
 #define event_dir "./event"
 #define always_dir "./always"
 
+// ¿¿¿¿ ¿¿¿¿? ¿¿ ¿¿¿¿ ¿¿ ¿¿ ¿¿?.
+int indent = 0;
+int dir_size = 0;
+
 char* get_time(char* ch){
     time_t rawtime;
     struct tm *timeinfo;
@@ -105,34 +109,6 @@ int mkalwaysdir()
 }
 
 
-int mk
-
- 
-
-// ¿¿¿ ¿¿ ¿¿ ¿¿¿¿¿ ¿¿ ¿¿¿¿¿ ¿¿¿¿ ¿¿.
-void subdirOutput(char *wd);
-
- 
-
-// ¿¿¿¿ ¿¿¿¿¿ ¿¿ ¿¿¿¿ ¿¿ ¿¿ ¿¿¿.
-int indent = 0;
- 
-
-int main()
-{
-    printf("Sub-Directory Ouput!!!\n");
-    printf("----------------------\n");
-
- 
-
-    // ¿¿ ¿¿¿¿¿ ¿¿ ¿¿¿¿¿ ¿¿¿¿¿.
-    subdirOutput(".");
-
- 
-
-    return 0;
-}
-
  
 
 void subdirOutput(char *wd)
@@ -142,86 +118,87 @@ void subdirOutput(char *wd)
     DIR *dirp;
     int i;
 
- 
-
-    // ¿¿¿ ¿¿¿¿ ¿¿¿¿¿ ¿¿¿¿.
+    // ¿¿? ¿¿¿¿ ¿¿¿¿? ¿¿¿¿.
     if(chdir(wd) < 0) {
         printf("error: chdir..\n");
+		// fprintf(stderr, "%s\n", strerror(errno));
         exit(1);
     }
 
- 
-
-    // ¿¿¿ ¿¿ ¿¿¿¿¿ ¿¿.
+    // ¿¿? ¿¿ ¿¿¿¿? ¿¿.
     if((dirp = opendir(".")) == NULL) {
         printf("error: opendir..\n");
         exit(1);
     }
 
- 
-
-    // ¿¿ ¿¿¿¿¿ ¿¿ ¿¿¿ ¿¿¿.
+    // ¿¿ ¿¿¿¿? ¿¿ ¿¿? ¿¿?.
     while(dentry = readdir(dirp)) {
-
- 
-
-        // ¿¿¿¿¿ ¿¿¿ ¿¿¿¿¿¿¿ 0 ¿¿ ¿¿ ¿¿¿.
-         // ¿¿¿¿¿¿¿ 0 ¿¿ ¿ ¿¿ ¿¿¿ ¿ ¿¿¿.
-         if(dentry->d_ino != 0) {
-
- 
-
-            // ¿¿¿ ¿¿¿ "."(¿¿¿¿¿¿)¿ ".."(¿¿¿¿¿¿)¿ ¿¿¿¿.
-            // ¿¿ ¿¿ ¿¿¿¿¿ ¿¿¿¿ ¿¿¿ ¿¿¿ ¿¿¿¿ ¿¿¿.
+        // ¿¿¿¿? ¿¿? ¿¿¿¿¿¿? 0 ¿¿ ¿¿ ¿¿?.
+        // ¿¿¿¿¿¿? 0 ¿¿ ? ¿¿ ¿¿? ? ¿¿?.
+        if(dentry->d_ino != 0) {
+            // ¿¿? ¿¿? "."(¿¿¿¿¿¿)? ".."(¿¿¿¿¿¿)? ¿¿¿¿.
+            // ¿¿ ¿¿ ¿¿¿¿? ¿¿¿¿ ¿¿? ¿¿? ¿¿¿¿ ¿¿?.
             if((!strcmp(dentry->d_name, ".")) || (!strcmp(dentry->d_name, "..")))
                 continue;
 
- 
-
-            // ¿¿ ¿¿¿ ¿¿¿¿¿ ¿¿¿¿.
+            // ¿¿ ¿¿? ¿¿¿¿? ¿¿¿¿.
             stat(dentry->d_name, &fstat);
 
- 
-
-            // ¿¿ ¿¿¿¿¿ ¿¿¿ ¿¿ ¿¿ ¿¿ ¿¿¿
+            // ¿¿ ¿¿¿¿? ¿¿? ¿¿ ¿¿ ¿¿ ¿¿?
             // ¿¿¿¿ ¿¿ ¿¿¿¿ Tab¿¿ ¿¿¿¿.
             for(i = 0; i < indent; i++)
                 printf("\t");
    
-            // ¿¿ ¿¿¿ ¿¿¿ ¿¿¿¿¿ ¿¿ 
-            // ¿¿¿¿ ¿¿¿¿ ¿¿¿¿ ¿¿ ¿¿¿ ¿¿¿¿ ¿
-            // subdirOutput¿¿¿ ¿¿ ¿¿¿¿¿ ¿¿ ¿¿¿¿ ¿¿¿ ¿¿¿¿.
+            // ¿¿ ¿¿? ¿¿? ¿¿¿¿? ¿¿ 
+            // ¿¿¿¿ ¿¿¿¿ ¿¿¿¿ ¿¿ ¿¿? ¿¿¿¿ ?
+            // subdirOutput¿¿? ¿¿ ¿¿¿¿? ¿¿ ¿¿¿¿ ¿¿? ¿¿¿¿.
             if(S_ISDIR(fstat.st_mode)) {
-                printf("%s\n", dentry->d_name);
+                // printf("%s\n", dentry->d_name);
                 indent++;
                 subdirOutput(dentry->d_name);
-   
-            // ¿¿ ¿¿¿ ¿¿¿ ¿¿¿¿¿ ¿¿ ¿¿
+
+            // ¿¿ ¿¿? ¿¿? ¿¿¿¿? ¿¿ ¿¿
             // ¿¿¿¿¿¿ ¿¿ ¿¿ ¿¿¿¿ ¿¿
-            // Tab¿¿ ¿¿¿¿ ¿¿¿ ¿¿¿¿.
-            } else {
+            // Tab¿¿ ¿¿¿¿ ¿¿? ¿¿¿¿.
+            } 
+			else {
                 printf("\r");
+				// dir_size += fstat.st_size;
+                dir_size += fstat.st_blksize * fstat.st_blocks;
             }
+			
         }
     }
-
- 
-
-    // ¿¿ ¿¿ ¿¿¿¿¿ ¿¿¿ ¿¿¿¿¿ ¿¿¿¿.
-    // ¿¿¿ ¿¿¿¿ ¿¿¿¿¿ ¿¿ ¿¿¿¿ ¿¿¿ ¿¿¿¿¿ 
-    // ¿¿¿¿ ¿¿ ¿¿¿ ¿¿ ¿¿¿ ¿¿ ¿¿¿¿¿ ¿¿¿¿.
+    // ¿¿ ¿¿ ¿¿¿¿? ¿¿? ¿¿¿¿? ¿¿¿¿.
+    // ¿¿? ¿¿¿¿ ¿¿¿¿? ¿¿ ¿¿¿¿ ¿¿? ¿¿¿¿? 
+    // ¿¿¿¿ ¿¿ ¿¿? ¿¿ ¿¿? ¿¿ ¿¿¿¿? ¿¿¿¿.
     closedir(dirp);
     indent--;
     chdir("..");
 }
 
 
-void main(){
-	int num1 = mkeventdir();
-	int num2 = mkalwaysdir();
-	printf("%d\n", num1);
-	printf("%d\n", num2);
+int main()
+{
+    printf("Sub-Directory Ouput!!!\n");
+    printf("----------------------\n");
+	
+ 
+
+    // ¿¿ ¿¿¿¿? ¿¿ ¿¿¿¿? ¿¿¿¿?.
+    subdirOutput("/home/jiwoong/objectDetection/pthread");
+    printf("size: %d\n", dir_size);
+ 
+    return 0;
 }
+
+// void main(){
+	// int num1 = mkeventdir();
+	// int num2 = mkalwaysdir();
+	// printf("%d\n", num1);
+	// printf("%d\n", num2);
+
+// }
 
 
 

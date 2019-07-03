@@ -5,6 +5,8 @@
 #include <unistd.h> //access
 #include <stdlib.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <dirent.h>
 	
 // #define DEBUG
 //	#include "debug_message.h"
@@ -103,8 +105,115 @@ int mkalwaysdir()
 }
 
 
-//int mk
+int mk
 
+ 
+
+// ¿¿¿ ¿¿ ¿¿ ¿¿¿¿¿ ¿¿ ¿¿¿¿¿ ¿¿¿¿ ¿¿.
+void subdirOutput(char *wd);
+
+ 
+
+// ¿¿¿¿ ¿¿¿¿¿ ¿¿ ¿¿¿¿ ¿¿ ¿¿ ¿¿¿.
+int indent = 0;
+ 
+
+int main()
+{
+    printf("Sub-Directory Ouput!!!\n");
+    printf("----------------------\n");
+
+ 
+
+    // ¿¿ ¿¿¿¿¿ ¿¿ ¿¿¿¿¿ ¿¿¿¿¿.
+    subdirOutput(".");
+
+ 
+
+    return 0;
+}
+
+ 
+
+void subdirOutput(char *wd)
+{
+    struct dirent *dentry;
+    struct stat fstat;
+    DIR *dirp;
+    int i;
+
+ 
+
+    // ¿¿¿ ¿¿¿¿ ¿¿¿¿¿ ¿¿¿¿.
+    if(chdir(wd) < 0) {
+        printf("error: chdir..\n");
+        exit(1);
+    }
+
+ 
+
+    // ¿¿¿ ¿¿ ¿¿¿¿¿ ¿¿.
+    if((dirp = opendir(".")) == NULL) {
+        printf("error: opendir..\n");
+        exit(1);
+    }
+
+ 
+
+    // ¿¿ ¿¿¿¿¿ ¿¿ ¿¿¿ ¿¿¿.
+    while(dentry = readdir(dirp)) {
+
+ 
+
+        // ¿¿¿¿¿ ¿¿¿ ¿¿¿¿¿¿¿ 0 ¿¿ ¿¿ ¿¿¿.
+         // ¿¿¿¿¿¿¿ 0 ¿¿ ¿ ¿¿ ¿¿¿ ¿ ¿¿¿.
+         if(dentry->d_ino != 0) {
+
+ 
+
+            // ¿¿¿ ¿¿¿ "."(¿¿¿¿¿¿)¿ ".."(¿¿¿¿¿¿)¿ ¿¿¿¿.
+            // ¿¿ ¿¿ ¿¿¿¿¿ ¿¿¿¿ ¿¿¿ ¿¿¿ ¿¿¿¿ ¿¿¿.
+            if((!strcmp(dentry->d_name, ".")) || (!strcmp(dentry->d_name, "..")))
+                continue;
+
+ 
+
+            // ¿¿ ¿¿¿ ¿¿¿¿¿ ¿¿¿¿.
+            stat(dentry->d_name, &fstat);
+
+ 
+
+            // ¿¿ ¿¿¿¿¿ ¿¿¿ ¿¿ ¿¿ ¿¿ ¿¿¿
+            // ¿¿¿¿ ¿¿ ¿¿¿¿ Tab¿¿ ¿¿¿¿.
+            for(i = 0; i < indent; i++)
+                printf("\t");
+   
+            // ¿¿ ¿¿¿ ¿¿¿ ¿¿¿¿¿ ¿¿ 
+            // ¿¿¿¿ ¿¿¿¿ ¿¿¿¿ ¿¿ ¿¿¿ ¿¿¿¿ ¿
+            // subdirOutput¿¿¿ ¿¿ ¿¿¿¿¿ ¿¿ ¿¿¿¿ ¿¿¿ ¿¿¿¿.
+            if(S_ISDIR(fstat.st_mode)) {
+                printf("%s\n", dentry->d_name);
+                indent++;
+                subdirOutput(dentry->d_name);
+   
+            // ¿¿ ¿¿¿ ¿¿¿ ¿¿¿¿¿ ¿¿ ¿¿
+            // ¿¿¿¿¿¿ ¿¿ ¿¿ ¿¿¿¿ ¿¿
+            // Tab¿¿ ¿¿¿¿ ¿¿¿ ¿¿¿¿.
+            } else {
+                printf("\r");
+            }
+        }
+    }
+
+ 
+
+    // ¿¿ ¿¿ ¿¿¿¿¿ ¿¿¿ ¿¿¿¿¿ ¿¿¿¿.
+    // ¿¿¿ ¿¿¿¿ ¿¿¿¿¿ ¿¿ ¿¿¿¿ ¿¿¿ ¿¿¿¿¿ 
+    // ¿¿¿¿ ¿¿ ¿¿¿ ¿¿ ¿¿¿ ¿¿ ¿¿¿¿¿ ¿¿¿¿.
+    closedir(dirp);
+    indent--;
+    chdir("..");
+}
 
 
 void main(){

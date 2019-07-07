@@ -1,27 +1,37 @@
 #include <stdio.h>
-#include <time.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <unistd.h> //access
 #include <stdlib.h>
+#include <time.h>
+#include <unistd.h> //access
+#include <libgen.h>
 #include <errno.h>
+#include <sys/vfs.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
-	
+
+
+
 // #define DEBUG
 //	#include "debug_message.h"
-// #ifdef DEBUG    // DEBUG°¡ Á¤ÀÇµÇ¾î ÀÖ´Ù¸é debug_message.h Çì´õ ÆÄÀÏ Æ÷ÇÔ
+// #ifdef DEBUG    // DEBUGï¿½ï¿½ ï¿½ï¿½ï¿½ÇµÇ¾ï¿½ ï¿½Ö´Ù¸ï¿½ debug_message.h ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 // #include "message.h"
-// #else           // ¾Æ´Ï¸é message.h Çì´õ ÆÄÀÏ Æ÷ÇÔ
+// #else           // ï¿½Æ´Ï¸ï¿½ message.h ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 // #endif
 
 #define size 256
 #define event_dir "./event"
 #define always_dir "./always"
 
-// ¿¿¿¿ ¿¿¿¿? ¿¿ ¿¿¿¿ ¿¿ ¿¿ ¿¿?.
+// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½?.
 int indent = 0;
 int dir_size = 0;
+struct f_size
+{
+	long blocks;
+	long avail;
+	long avail_per;
+};
 
 char* get_time(char* ch){
     time_t rawtime;
@@ -53,23 +63,23 @@ void makedir(char* pos, char* time_type){
 	mkdir(pos, 0755);
 }
 
-// access ÇÔ¼ö - µð·ºÅä¸® À¯¹« ¹× ±ÇÇÑ È®ÀÎ
-// R_OK : ÆÄÀÏ Á¸Àç ¿©ºÎ, ÀÐ±â ±ÇÇÑ ¿©ºÎ
-// W_OK : ÆÄÀÏ Á¸Àç ¿©ºÎ, ¾²±â ±ÇÇÑ ¿©ºÎ
-// X_OK : ÆÄÀÏ Á¸Àç ¿©ºÎ, ½ÇÇà ±ÇÇÑ ¿©ºÎ
-// F_OK : ÆÄÀÏ Á¸Àç ¿©ºÎ 
+// access ï¿½Ô¼ï¿½ - ï¿½ï¿½ï¿½ä¸® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
+// R_OK : ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½Ð±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+// W_OK : ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+// X_OK : ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+// F_OK : ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 
 
-// 00 - ÆÄÀÏ ¹× µð·ºÅä¸®°¡ Á¸Àç ÇÏ´ÂÁö Á¶»ç
-// 02 - ¾²±â Á¢±ÙÀÌ Çã¿ëµÇ´ÂÁö Á¶»ç
-// 04 - ÀÐ±â Á¢±ÙÀÌ Çã¿ëµÇ´ÂÁö Á¶»ç
-// 06 - ÀÐ±â ¹× ¾²±â°¡ Çã¿ëµÇ´ÂÁö Á¶»ç
+// 00 - ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ä¸®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ï´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+// 02 - ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ç´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+// 04 - ï¿½Ð±ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ç´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+// 06 - ï¿½Ð±ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½â°¡ ï¿½ï¿½ï¿½Ç´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 //	char *pathname = "./hello.txt";
 // 	int mode = R_OK | W_OK;
 // 	if( access( pathname, mode ) == 0 )
-// 		printf("ÀÐ°í ¾µ ¼ö ÀÖ½À´Ï´Ù.");
+// 		printf("ï¿½Ð°ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö½ï¿½ï¿½Ï´ï¿½.");
 // 	else
-// 		printf("±ÇÇÑÀÌ ¾ø°Å³ª Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.");
+// 		printf("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Å³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê½ï¿½ï¿½Ï´ï¿½.");
 
 
 int mkeventdir()
@@ -118,48 +128,48 @@ void subdirOutput(char *wd)
     DIR *dirp;
     int i;
 
-    // ¿¿? ¿¿¿¿ ¿¿¿¿? ¿¿¿¿.
+    // ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½.
     if(chdir(wd) < 0) {
         printf("error: chdir..\n");
 		// fprintf(stderr, "%s\n", strerror(errno));
         exit(1);
     }
 
-    // ¿¿? ¿¿ ¿¿¿¿? ¿¿.
+    // ï¿½ï¿½? ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½.
     if((dirp = opendir(".")) == NULL) {
         printf("error: opendir..\n");
         exit(1);
     }
 
-    // ¿¿ ¿¿¿¿? ¿¿ ¿¿? ¿¿?.
+    // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½?.
     while(dentry = readdir(dirp)) {
-        // ¿¿¿¿? ¿¿? ¿¿¿¿¿¿? 0 ¿¿ ¿¿ ¿¿?.
-        // ¿¿¿¿¿¿? 0 ¿¿ ? ¿¿ ¿¿? ? ¿¿?.
+        // ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½? 0 ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½?.
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½? 0 ï¿½ï¿½ ? ï¿½ï¿½ ï¿½ï¿½? ? ï¿½ï¿½?.
         if(dentry->d_ino != 0) {
-            // ¿¿? ¿¿? "."(¿¿¿¿¿¿)? ".."(¿¿¿¿¿¿)? ¿¿¿¿.
-            // ¿¿ ¿¿ ¿¿¿¿? ¿¿¿¿ ¿¿? ¿¿? ¿¿¿¿ ¿¿?.
+            // ï¿½ï¿½? ï¿½ï¿½? "."(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)? ".."(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)? ï¿½ï¿½ï¿½ï¿½.
+            // ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½?.
             if((!strcmp(dentry->d_name, ".")) || (!strcmp(dentry->d_name, "..")))
                 continue;
 
-            // ¿¿ ¿¿? ¿¿¿¿? ¿¿¿¿.
+            // ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½.
             stat(dentry->d_name, &fstat);
 
-            // ¿¿ ¿¿¿¿? ¿¿? ¿¿ ¿¿ ¿¿ ¿¿?
-            // ¿¿¿¿ ¿¿ ¿¿¿¿ Tab¿¿ ¿¿¿¿.
+            // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½? ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½?
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Tabï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
             for(i = 0; i < indent; i++)
                 printf("\t");
    
-            // ¿¿ ¿¿? ¿¿? ¿¿¿¿? ¿¿ 
-            // ¿¿¿¿ ¿¿¿¿ ¿¿¿¿ ¿¿ ¿¿? ¿¿¿¿ ?
-            // subdirOutput¿¿? ¿¿ ¿¿¿¿? ¿¿ ¿¿¿¿ ¿¿? ¿¿¿¿.
+            // ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ 
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½ ?
+            // subdirOutputï¿½ï¿½? ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½.
             if(S_ISDIR(fstat.st_mode)) {
                 // printf("%s\n", dentry->d_name);
                 indent++;
                 subdirOutput(dentry->d_name);
 
-            // ¿¿ ¿¿? ¿¿? ¿¿¿¿? ¿¿ ¿¿
-            // ¿¿¿¿¿¿ ¿¿ ¿¿ ¿¿¿¿ ¿¿
-            // Tab¿¿ ¿¿¿¿ ¿¿? ¿¿¿¿.
+            // ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ ï¿½ï¿½
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
+            // Tabï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½.
             } 
 			else {
                 printf("\r");
@@ -169,28 +179,81 @@ void subdirOutput(char *wd)
 			
         }
     }
-    // ¿¿ ¿¿ ¿¿¿¿? ¿¿? ¿¿¿¿? ¿¿¿¿.
-    // ¿¿? ¿¿¿¿ ¿¿¿¿? ¿¿ ¿¿¿¿ ¿¿? ¿¿¿¿? 
-    // ¿¿¿¿ ¿¿ ¿¿? ¿¿ ¿¿? ¿¿ ¿¿¿¿? ¿¿¿¿.
+    // ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½.
+    // ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½? 
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½.
     closedir(dirp);
     indent--;
     chdir("..");
 }
 
 
-int main()
-{
-    printf("Sub-Directory Ouput!!!\n");
-    printf("----------------------\n");
-	
- 
 
-    // ¿¿ ¿¿¿¿? ¿¿ ¿¿¿¿? ¿¿¿¿?.
-    subdirOutput("/home/jiwoong/objectDetection/pthread");
-    printf("size: %d\n", dir_size);
- 
-    return 0;
+
+
+
+
+
+struct f_size* avail(char* dirname)
+{
+	char buf[256];
+	char null[16];
+	float avail;
+	int trans;
+	struct statfs lstatfs;
+	struct stat lstat;
+	struct f_size* lf_size;
+
+	lf_size = (struct f_size*)malloc(sizeof(lf_size));
+
+	if (stat(dirname, &lstat) == -1)
+	{
+		perror("stat_error");
+		return NULL;
+	}
+	printf("%d\n", S_ISBLK(lstat.st_mode));  
+	if (statfs(dirname, &lstatfs) == -1) {
+		perror("statfs_error");
+		return NULL;
+	}
+	lf_size->blocks = lstatfs.f_blocks * (lstatfs.f_bsize / 1024);
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ã½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ * ï¿½ï¿½ï¿½ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ / 1024
+	lf_size->avail = lstatfs.f_bavail * (lstatfs.f_bsize / 1024);
+	// ï¿½ï¿½-ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ * ï¿½ï¿½ï¿½ï¿½È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ / 1024
+	lf_size->avail_per = lstatfs.f_bavail / lstatfs.f_blocks;
+	return lf_size;
 }
+
+
+int main(int argc, char* argv[])
+{
+	struct f_size* f_inf;
+	mkalwaysdir();
+	if ((f_inf = avail(argv[1])) == NULL)
+	{
+		perror("avail error");
+		return 1;
+	}
+
+	printf("ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: %ld\nï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: %ld\nï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½: %ld\n", f_inf->blocks, f_inf->avail, f_inf->avail_per);
+	free(f_inf);
+}
+
+
+// subdirOuput ï¿½Ô¼ï¿½ testï¿½ï¿½
+//int main()
+//{
+//    printf("Sub-Directory Ouput!!!\n");
+//    printf("----------------------\n");
+//	
+// 
+//
+//    // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½?.
+//    subdirOutput("/home/jiwoong/objectDetection/pthread");
+//    printf("size: %d\n", dir_size);
+// 
+//    return 0;
+//}
 
 // void main(){
 	// int num1 = mkeventdir();
@@ -201,5 +264,3 @@ int main()
 // }
 
 
-
-	

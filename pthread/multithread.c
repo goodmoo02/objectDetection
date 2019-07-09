@@ -11,7 +11,7 @@ void *f_function(void * data)
 	pthread_t t_id;
 	id = *((int *)data);
 	
-	printf("pid=%d, t_is=%lu, id=%d, glob_var = %d\n", getpid(), t_id, id, glob_var);
+	printf("pid=%d, t_id=%lu, id=%d, glob_var = %d\n", getpid(), t_id, id, glob_var);
 	return (void *)(id * id);
 }
 int main(void)
@@ -22,7 +22,7 @@ int main(void)
 	int b=2;
 	int err;	
 
-	printf("before pthread_cread() pid = %d, glob_var = %d\n", getpid(), glob_var);
+	printf("before pthread_cread() pid = %d, gid = %d, glob_var = %d\n", getpid(), getgid(), glob_var);
 	//create thread1
 	
 	if ((err = pthread_create(&p_thread[0], NULL, t_function, (void*)&a)) < 0)

@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <sys/syscall.h>
 
 int glob_var = 6;
 
@@ -14,6 +15,7 @@ void *t_function(void *data)
 // pthread_t pthread_self(void)
     t_id=pthread_self();
     printf("pid=%d, t_id=%lu, id=%d, glob_var=%d\n",getpid(),t_id,id,glob_var);
+    printf("pid=%d\n", syscall(__NR_gettid));
     return (void*)(id*id);
 }
 

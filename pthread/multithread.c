@@ -4,7 +4,7 @@
 
 int glob_var = 6;
 
-void *f_function(void * data)
+void *t_function(void * data)
 {
 	int id;
 	int i = 0;
@@ -33,7 +33,7 @@ int main(void)
 
 	//create thread2
 	
-	if (err = pthread_create(&p_thread[0], NULL, t_function, (void*)&a)) < 0)
+	if ((err = pthread_create(&p_thread[1], NULL, t_function, (void*)&a)) < 0)
 	{
 		perror("thread create error : ");
 		exit(2);

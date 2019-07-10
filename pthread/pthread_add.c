@@ -1,7 +1,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/time.h> // getimeofday( ) í•¨ìˆ˜ì—ì„œ ì‚¬ìš©
+#include <sys/time.h> // getimeofday( ) ?•¨?ˆ˜?—?„œ ?‚¬?š©
 #include <stdlib.h>
 
 struct value
@@ -16,7 +16,8 @@ void *add_func(void *data)
 	int i;
 	long long result=0;
 	struct value value1;
-	pthread_t t_id; value1 = *((struct value *)data);
+	pthread_t t_id; 
+	value1 = *((struct value *)data);
 
 	//printf("start = %d\n", value1.start);
 	//printf("end = %d\n", value1.end);
@@ -81,8 +82,8 @@ int main(int argc, char *argv[])
 	switch(thread_num)
 	{
 		// int gettimeofday(struct timeval *tv, struct timezone *tz);
-		// gettimeofday(&tv, NULL) í˜•íƒœë¡œ ì“°ì„.
-		// timeval ì— secì™€ usec ì „ë‹¬
+		// gettimeofday(&tv, NULL) ?˜•?ƒœë¡? ?“°?„.
+		// timeval ?— sec??? usec ? „?‹¬
 		case 1: gettimeofday(&UTCtime_s, NULL);
 				result = adder(1, end);
 				gettimeofday(&UTCtime_e, NULL);
@@ -97,7 +98,7 @@ int main(int argc, char *argv[])
 			value2.end   = end;
 
 			gettimeofday(&UTCtime_s, NULL);
-    			if((err = pthread_create(&p_thread[0], NULL, add_func, (void*)&value1)) < 0)
+    		if((err = pthread_create(&p_thread[0], NULL, add_func, (void*)&value1)) < 0)
 			{
 				perror("thread create error : "); 
 				exit(1);
@@ -125,3 +126,4 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
+

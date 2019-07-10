@@ -25,14 +25,14 @@ int main()
     std::string pipeline = get_tegra_pipeline(WIDTH, HEIGHT, FPS);
     std::cout << "Using pipeline: \n\t" << pipeline << "\n";
 
-	//ºñµð¿À Ä¸ÃÄ ÃÊ±âÈ­
+	// ë¹„ë””ì˜¤ ìº¡ì³ ì´ˆê¸°í™”
 	VideoCapture cap(pipeline);
 	if (!cap.isOpened()) {
-		cerr << "¿¡·¯ - Ä«¸Þ¶ó¸¦ ¿­ ¼ö ¾ø½À´Ï´Ù.\n";
+		cerr << "ì—ëŸ¬ - ì¹´ë©”ë¼ë¥¼ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n";
 		return -1;
 	}
 
-	// µ¿¿µ»ó ÆÄÀÏÀ» ÀúÀåÇÏ±â À§ÇÑ ÁØºñ  
+	// ë™ì˜ìƒ íŒŒì¼ì„ ì €ìž¥í•˜ê¸° ìœ„í•œ ì¤€ë¹„  
 	Size size = Size((int)cap.get(CAP_PROP_FRAME_WIDTH),
 		(int)cap.get(CAP_PROP_FRAME_HEIGHT));
 
@@ -41,7 +41,7 @@ int main()
 	writer.open("output.avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), fps, size, true);
 	if (!writer.isOpened())
 	{
-		cout << "µ¿¿µ»óÀ» ÀúÀåÇÏ±â À§ÇÑ ÃÊ±âÈ­ ÀÛ¾÷ Áß ¿¡·¯ ¹ß»ý" << endl;
+		cout << "ë™ì˜ìƒì„ ì €ìž¥í•˜ê¸° ìœ„í•œ ì´ˆê¸°í™” ìž‘ì—… ì¤‘ ì—ëŸ¬ ë°œìƒ" << endl;
 		return 1;
 	}
 
@@ -50,21 +50,17 @@ int main()
 	{
 		cap.read(img_color);
 		if (img_color.empty()) {
-			cerr << "ºó ¿µ»óÀÌ Ä¸ÃÄµÇ¾ú½À´Ï´Ù.\n";
+			cerr << "ë¹ˆ ì˜ìƒì´ ìº¡ì³ë˜ì—ˆìŠµë‹ˆë‹¤.\n";
 			break;
 		}
 
-		//µ¿¿µ»ó ÆÄÀÏ¿¡ ÇÑ ÇÁ·¹ÀÓÀ» ÀúÀåÇÔ.  
+		//ë™ì˜ìƒ íŒŒì¼ì— í•œ í”„ë ˆìž„ì„ ì €ìž¥í•¨.  
 		writer.write(img_color);
 
 		imshow("Color", img_color);
 
 		if (waitKey(25) >= 0)
 			break;
-
-
 	}
-	
-
 	return 0;
 }

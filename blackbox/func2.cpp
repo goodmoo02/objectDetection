@@ -28,10 +28,7 @@ void* mkfrontdir(void* voi)
 	strcpy(dir, event_dir);
 	strcpy(dir2, always_dir);
 	if (access(dir, 0) == 0)
-	{
-		printf("file exists");
-		exit(1);
-	}
+		printf("event_dir exists\n");
 	else
 	{
 		if((ret = mkdir(dir, 0755)) == -1)
@@ -42,7 +39,9 @@ void* mkfrontdir(void* voi)
 		printf("success making %s\n", dir);    
 	}
 	if (access(dir2, 0) == 0)
-		exit(1);
+	{
+		printf("always_dir exists\n");
+	}
 	else
 	{
 		if((ret = mkdir(dir2, 0755)) == -1)
@@ -63,6 +62,7 @@ char* gettime(char* ch){
 	time_t rawtime;
 	struct tm *timeinfo;
 	char* buffer = (char*)malloc(sizeof(char)*256);
+	time(&rawtime);
 	if ((timeinfo = localtime(&rawtime)) == NULL)
 	{
 		printf("1");
@@ -72,7 +72,7 @@ char* gettime(char* ch){
 		else if ((ch == "h") || (ch == "H"))		
 		strftime(buffer, size, "%Y%m%d_%H/", timeinfo);
 		else if ((ch == "s") || (ch == "S"))
-			strftime(buffer, size, "%Y%m%d_%H%M%S/", timeinfo);
+			strftime(buffer, size, "%Y%m%d_%H%M%S", timeinfo);
 		else
 			return 0;
 		
@@ -95,17 +95,18 @@ char* gettime(char* ch){
 		return UTCtime_r.tv_sec;
 	}
 
-	char* makedir(void* voi){
-		char str_buf[size] = {0, };
-		char* time_buf;
-		char* ch = "h";
-		if ((time_buf = gettime(ch)) == NULL){
+char* makedir(void* voi){
+	char* str_buf  = (char*)malloc(sizeof(char)*size); 
+	char* time_buf;
+	char* ch = "h";
+	if ((time_buf = gettime(ch)) == NULL){
 		perror("gettime failed");
+		exit(1);
 	}
-    strcpy(str_buf, always_dir);
-	strcat(str_buf, time_buf);
-	mkdir(str_buf, 0755);
-    return str_buf;
+		strcpy(str_buf, always_dir);
+		strcat(str_buf, time_buf);
+		mkdir(str_buf, 0755);
+	return str_buf;
 }
 
 std::string get_tegra_pipeline(int width, int height, int fps) {
@@ -114,28 +115,86 @@ std::string get_tegra_pipeline(int width, int height, int fps) {
             "/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink";
 }
 
-int rec(struct cap_dir* cd)
+// int rec(struct cap_dir* cd)
+// {
+// 	VideoWriter writer;
+// 	// 동영상 파일을 저장하기 위한 준비
+// 	Size size1 = Size((int)cd->capp->get(CAP_PROP_FRAME_WIDTH),(int)cd->capp->get(CAP_PROP_FRAME_HEIGHT));
+//     double fps = 30.0;
+// 	writer.open(cd->dir, VideoWriter::fourcc('D', 'I', 'V', 'X'), fps, size1, true);
+// 	if (!writer.isOpened())
+// 	{
+// 		cout << "동영상을 저장하기 위한 초기화 작업 중 에러 발생" << endl;
+// 		return 1;
+// 	}
+
+//     Mat img_color;
+
+//     struct timeval UTCtime_s, UTCtime_e;
+//     int act_time;
+//     gettimeofday(&UTCtime_s, NULL);
+// 	while(1)
+// 	{
+// 		cd->capp->read(img_color);
+// 		if (img_color.empty()) {
+// 			cerr << "빈 영상이 캡쳐되었습니다.\n";
+// 			break;
+// 		}
+
+// 		//동영상 파일에 한 프레임을 저장함.  
+// 		writer.write(img_color);
+
+// 		imshow("Color", img_color);
+//         if (waitKey(25) >= 0)
+// 			break;
+//         gettimeofday(&UTCtime_e, NULL);
+        
+//         if((act_time = disp_runtime(UTCtime_s, UTCtime_e))== 10)
+//             break;
+// 	}
+// 	return 0;
+// }
+
+void* mkdir_file(void* cap)
 {
-	VideoWriter writer;
-	// 동영상 파일을 저장하기 위한 준비
-	Size size1 = Size((int)cd->capp->get(CAP_PROP_FRAME_WIDTH),(int)cd->capp->get(CAP_PROP_FRAME_HEIGHT));
-    double fps = 30.0;
-	writer.open(cd->dir, VideoWriter::fourcc('D', 'I', 'V', 'X'), fps, size1, true);
-	if (!writer.isOpened())
-	{
-		cout << "동영상을 저장하기 위한 초기화 작업 중 에러 발생" << endl;
-		return 1;
-	}
-
-    Mat img_color;
-
-    struct timeval UTCtime_s, UTCtime_e;
-    int act_time;
-    gettimeofday(&UTCtime_s, NULL);
 	while(1)
 	{
-		cd->capp->read(img_color);
-		if (img_color.empty()) {
+        	char addr[size] = {0, };
+        	char* time_buf;
+		char* str_buf = makedir((void*)0);
+		VideoCapture cap1 = *(VideoCapture*)cap;
+		
+	        strcpy(addr, str_buf);
+		free(str_buf);
+		if ((time_buf = gettime("s")) == NULL)
+			perror("gettime failed");
+        	strcat(addr, time_buf);
+        	strcat(addr, ".avi");
+		
+		VideoWriter writer;
+		// 동영상 파일을 저장하기 위한 준비
+		Size size1 = Size((int)cap1.get(CAP_PROP_FRAME_WIDTH),(int)cap1.get(CAP_PROP_FRAME_HEIGHT));
+		printf("%d\n", (int)cap1.get(CAP_PROP_FRAME_WIDTH));
+    		double fps = 30.0;
+		printf("%s\n", addr);
+		writer.open(addr, VideoWriter::fourcc('D', 'I', 'V', 'X'), fps, size1, true);
+
+		if (!writer.isOpened())
+		{
+			cout << "동영상을 저장하기 위한 초기화 작업 중 에러 발생" << endl;
+			exit(0);
+		}
+
+    	Mat img_color;
+
+    	struct timeval UTCtime_s, UTCtime_e;
+    	int act_time;
+    	gettimeofday(&UTCtime_s, NULL);
+	while(1)
+	{
+		cap1.read(img_color);
+		if (img_color.empty()) 
+		{
 			cerr << "빈 영상이 캡쳐되었습니다.\n";
 			break;
 		}
@@ -144,34 +203,16 @@ int rec(struct cap_dir* cd)
 		writer.write(img_color);
 
 		imshow("Color", img_color);
-        if (waitKey(25) >= 0)
+        	if (waitKey(25) >= 0)
 			break;
-        gettimeofday(&UTCtime_e, NULL);
+        	gettimeofday(&UTCtime_e, NULL);
         
-        if((act_time = disp_runtime(UTCtime_s, UTCtime_e))== 10)
-            break;
+        	if((act_time = disp_runtime(UTCtime_s, UTCtime_e))== 10)
+            		break;
 	}
-	return 0;
-}
-void* mkdir_file(void* cap){
-    while(1){
-        struct cap_dir* cd = (struct cap_dir*)malloc(sizeof(struct cap_dir));
-        char addr[size] = {0, };
-        char* time_buf;
-        strcpy(addr, makedir((void*)0));
-        strcat(addr, "/");
-        if ((time_buf = gettime("h")) == NULL){
-            perror("gettime failed");
-        }
-        strcat(addr, time_buf);
-        strcat(addr, ".avi");
-        //cd->capp = (struct cap_dir*)malloc(sizeof(struct cap_dir));
-	cd->capp = (cv::VideoCapture*)cap;
-        cd->dir = addr;
-        rec(cd);
-	//cd = (void*)cd;
-        free(cd);
-    }
+	
+	}
+	exit(0);
 }
 
 
@@ -220,7 +261,6 @@ float avail(void* voi)
 	float avail;
 	struct statfs lstatfs;
     getcwd(addr, size);
-    printf("%s\n", addr);
 	if (statfs(addr, &lstatfs) == -1) {
 		perror("statfs_error");
 		return -1;

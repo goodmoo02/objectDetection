@@ -1,8 +1,8 @@
 #include <opencv2/opencv.hpp>
 #include <sstream>
 
-#define event_dir "./event"
-#define always_dir "./always"
+#define event_dir "./event/"
+#define always_dir "./always/"
 #define max_len 256	
 #define size 256
 
@@ -28,7 +28,7 @@ struct f_size
 
 struct cap_dir{
     char* dir;
-    cv::VideoCapture* capp;
+    cv::VideoCapture capp;
 };
 
 

@@ -5,7 +5,7 @@
 #define always_dir "./always/"
 #define max_len 256	
 #define size 256
-
+#define act_time 60
 //int indent = 0;
 //int dir_size1 = 0;
 

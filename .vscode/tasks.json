@@ -39,7 +39,8 @@
                 "${file}",
                 "-g",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${fileDirname}/${fileBasenameNoExtension}",
+                "-lpthread"
             ],
             "group": {
                 "kind": "build",

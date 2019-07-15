@@ -14,22 +14,10 @@
 #include <pthread.h>
 #include <sys/syscall.h>
 #include <sys/time.h>
-#include "declare.hpp"
-
-/*
-int WIDTH = 640;
-int HEIGHT = 480;
-int FPS = 30;
-
+#include "declare2.hpp"
 
 using namespace cv;
 using namespace std;
-
-string pipeline = get_tegra_pipeline(WIDTH, HEIGHT, FPS);
-
-VideoCapture cap(pipeline, CAP_GSTREAMER);
-*/
-
 
 char* gettime(char* ch) {
 	time_t rawtime;
@@ -88,7 +76,6 @@ void* mkfrontdir(void* voi)
 		}
 		printf("success making %s\n", dir2);
 	}
-	exit(0);
 }
 
 
@@ -107,7 +94,7 @@ char* makedir(void* voi) {
 }
 
 
-std::string get_tegra_pipeline(int width, int height, int fps) {
+string get_tegra_pipeline(int width, int height, int fps) {
 	return "nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)" + patch::to_string(width) + ", height=(int)" +
 		patch::to_string(height) + ", format=(string)NV12, framerate=(fraction)" + patch::to_string(fps) +
 		"/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink";
@@ -117,26 +104,11 @@ std::string get_tegra_pipeline(int width, int height, int fps) {
 void* mkdir_file(void* voi)
 {
 	int i = 1;
-	
-	int WIDTH = 640;
-	int HEIGHT = 480;
-	int FPS = 30;
-	
-	
-	using namespace cv;
-	using namespace std;
-
-	string pipeline = get_tegra_pipeline(WIDTH, HEIGHT, FPS);
-	
-	VideoCapture cap(pipeline, CAP_GSTREAMER);
-
-	if (!cap.isOpened()) {
-		cerr << "error: VideoCapture not opened\n";
-		exit(1);
-	}
+	int* result = (int*) voi;
 
 	while (i)
-	{
+	{	
+		pthread_mutex_lock(&mutex_lock);
 		char addr[size] = { 0, };
 		char* time_buf;
 		char* dir_buf = makedir((void*)0);
@@ -149,7 +121,22 @@ void* mkdir_file(void* voi)
 		strcat(addr, time_buf);
 		strcat(addr, ".avi");
 		printf("%s\n", addr);
+		pthread_mutex_unlock(&mutex_lock);
+	}
+}
 
+
+void* mkdir_file2(void* voi)
+{
+	int i = 1;
+	int* result = (int*) voi;
+	int WIDTH = 640;
+	int HEIGHT = 480;
+	int FPS = 30;
+
+	while (i)
+	{
+		pthread_mutex_unlock(&mutex_lock);
 		VideoWriter writer;
 		Size size1 = Size((int)cap.get(CAP_PROP_FRAME_WIDTH), (int)cap.get(CAP_PROP_FRAME_HEIGHT));
 		printf("width: %d, height: %d\n", (int)cap.get(CAP_PROP_FRAME_WIDTH), (int)cap.get(CAP_PROP_FRAME_WIDTH));
@@ -197,7 +184,11 @@ void* mkdir_file(void* voi)
 	}
 	destroyAllWindows();
 	FLAG = 1;
+	*result = 0;
 }
+
+
+
 
 int disp_runtime(struct timeval UTCtime_s, struct timeval UTCtime_e)
 {

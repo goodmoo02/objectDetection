@@ -18,6 +18,12 @@ namespace patch
 	}
 }
 
+class Cvcap{
+	private:
+		VideoCapture cap;
+	public:
+		VideoCapture cap(pipeline, CAP_GSTREAMER);
+};
 
 // 함수 선언
 std::string get_tegra_pipeline(int, int, int);
@@ -31,3 +37,4 @@ int rm_olddir(char*);
 void* auto_rmdir(void*);
 
 extern int FLAG;	
+extern pthread_mutex_t mutex_lock;
